@@ -1,0 +1,138 @@
+name: CI
+
+on:
+  push:
+  schedule:
+    - cron: 0 0 * * *
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  ci:
+    name: CI
+    runs-on: windows-latest
+    steps:
+      - name: Download Fido
+        run: |
+          # https://github.com/pbatard/Fido
+          Invoke-WebRequest -Uri "https://raw.githubusercontent.com/pbatard/Fido/master/Fido.ps1" -OutFile "Fido.ps1"
+        shell: pwsh
+      - name: List Windows Versions & Languages
+        run: |
+          .\Fido.ps1 -Win List
+          .\Fido.ps1 -Lang List
+          exit 0
+        shell: pwsh
+      - name: Download Windows ISO
+        run: |
+          .\Fido.ps1 -Win "${{ matrix.Win }}" -Lang "${{ matrix.Lang }}"
+          Get-ChildItem
+        shell: pwsh
+      - name: Set Tag
+        run: |
+          files=(*.iso)
+          stem=${files[0]%.iso}
+          Win=$(echo "$stem" | sed --regexp-extended 's/([[:alnum:]]+)_([[:alnum:]]+)_([[:graph:]]+)_([[:alnum:]]+)/\1/')
+          echo "::notice::Win = $Win"
+          Rel=$(echo "$stem" | sed --regexp-extended 's/([[:alnum:]]+)_([[:alnum:]]+)_([[:graph:]]+)_([[:alnum:]]+)/\2/')
+          echo "::notice::Rel = $Rel"
+          Lang=$(echo "$stem" | sed --regexp-extended 's/([[:alnum:]]+)_([[:alnum:]]+)_([[:graph:]]+)_([[:alnum:]]+)/\3/')
+          echo "::notice::Lang = $Lang"
+          Arch=$(echo "$stem" | sed --regexp-extended 's/([[:alnum:]]+)_([[:alnum:]]+)_([[:graph:]]+)_([[:alnum:]]+)/\4/')
+          echo "::notice::Arch = $Arch"
+          TAG="$Win-$Lang"
+          echo "TAG=$TAG" >> "$GITHUB_ENV"
+        shell: bash
+      - name: Extract Fonts
+        run: |
+          # https://wiki.archlinux.org/title/Microsoft_fonts#Extracting_fonts_from_a_Windows_ISO
+          7z e *.iso sources/install.wim
+          7z e -y install.wim 1/Windows/{Fonts/"*".{ttf,ttc},System32/Licenses/neutral/"*"/"*"/license.rtf} -ofonts/
+        shell: bash
+      - name: Pack Fonts
+        run: 7z a "$TAG.zip" *
+        working-directory: ./fonts
+        shell: bash
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.Win }}-${{ matrix.Lang }}
+          path: ./fonts/*.zip
+    strategy:
+      matrix:
+        Win:
+          - Windows 11
+          - Windows 10
+        Lang:
+          - Chinese (Simplified)
+          - English
+
+  release:
+    name: Release
+    permissions:
+      contents: write
+    needs:
+      - ci
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ${{ matrix.Win }}-*
+          merge-multiple: true
+      - name: Set Tag
+        run: |
+          filename=(*.zip)
+          stem=${filename%.zip}
+          Win=$(echo "$stem" | sed --regexp-extended 's/([[:alnum:]]+)-([[:graph:]]+)/\1/')
+          echo "::notice::Win = $Win"
+          Lang=$(echo "$stem" | sed --regexp-extended 's/([[:alnum:]]+)-([[:graph:]]+)/\2/')
+          echo "::notice::Rel = $Lang"
+          TAG="$Win"
+          echo "TAG=$TAG" >> "$GITHUB_ENV"
+      - name: Create Release
+        run: |
+          gh release --repo="${{ github.repository }}" delete --cleanup-tag "$TAG" || true
+          gh release --repo="${{ github.repository }}" create --title "$TAG" "$TAG" *.zip
+        env:
+          GH_TOKEN: ${{ github.token }}
+    strategy:
+      matrix:
+        Win:
+          - Windows 11
+          - Windows 10
+
+  mark-latest:
+    name: Mark as Latest
+    permissions:
+      contents: write
+    needs:
+      - release
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ${{ matrix.Win }}-*
+          merge-multiple: true
+      - name: Set Tag
+        run: |
+          filename=(*.zip)
+          stem=${filename%.zip}
+          Win=$(echo "$stem" | sed --regexp-extended 's/([[:alnum:]]+)-([[:graph:]]+)/\1/')
+          echo "::notice::Win = $Win"
+          Lang=$(echo "$stem" | sed --regexp-extended 's/([[:alnum:]]+)-([[:graph:]]+)/\2/')
+          echo "::notice::Rel = $Lang"
+          TAG="$Win"
+          echo "TAG=$TAG" >> "$GITHUB_ENV"
+      - name: Mark as Latest
+        run: gh release --repo="${{ github.repository }}" edit --latest "$TAG"
+        env:
+          GH_TOKEN: ${{ github.token }}
+    strategy:
+      matrix:
+        Win:
+          - Windows 11

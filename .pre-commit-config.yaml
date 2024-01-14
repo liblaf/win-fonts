@@ -1,0 +1,148 @@
+ci:
+  autofix_commit_msg: |
+    ci(pre-commit): auto fixes from pre-commit.com hooks
+
+    for more information, see https://pre-commit.ci
+  autoupdate_commit_msg: |
+    ci(pre-commit): pre-commit autoupdate
+  skip:
+    - cargo-check
+    - cargo-clippy
+    - cargo-test
+    - cspell
+    - latexindent
+    - poetry-lock
+    - shellcheck
+
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.11
+    hooks:
+      - id: ruff
+        args:
+          - --fix
+      - id: ruff-format
+  - repo: https://github.com/cmhughes/latexindent.pl
+    rev: V3.23.5
+    hooks:
+      - id: latexindent
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v3.13.0
+    hooks:
+      - id: commitizen
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.9.0
+    hooks:
+      - id: shellcheck
+        files: \.(bash|sh|zsh)(\.tmpl)?$
+        types:
+          - text
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v17.0.6
+    hooks:
+      - id: clang-format
+        types_or:
+          - c
+          - c++
+          - cuda
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
+    hooks:
+      - id: prettier
+        stages:
+          - pre-commit
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-ast
+      - id: check-builtin-literals
+      - id: check-case-conflict
+      - id: check-docstring-first
+      - id: check-executables-have-shebangs
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: check-toml
+      - id: check-vcs-permalinks
+      - id: check-xml
+      - id: check-yaml
+      - id: debug-statements
+      - id: destroyed-symlinks
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: fix-byte-order-marker
+      - id: mixed-line-ending
+      - id: name-tests-test
+      - id: trailing-whitespace
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.27.3
+    hooks:
+      - id: check-dependabot
+      - id: check-github-actions
+      - id: check-github-workflows
+  - repo: https://github.com/python-poetry/poetry
+    rev: 1.7.0
+    hooks:
+      - id: poetry-check
+      - id: poetry-lock
+      - id: poetry-export
+        args:
+          - --without-hashes
+          - --without-urls
+      - id: poetry-install
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.7.0-4
+    hooks:
+      - id: shfmt
+        files: \.(bash|sh|zsh)(\.tmpl)?$
+        types:
+          - text
+        args:
+          - --write
+          - --simplify
+          - --indent=2
+          - --case-indent
+          - --space-redirects
+  - repo: https://github.com/sirosen/texthooks
+    rev: 0.6.3
+    hooks:
+      - id: fix-smartquotes
+      - id: fix-ligatures
+      - id: fix-spaces
+      - id: forbid-bidi-controls
+      - id: alphabetize-codeowners
+  - repo: https://github.com/streetsidesoftware/cspell-cli
+    rev: v8.3.0
+    hooks:
+      - id: cspell
+  - repo: local
+    hooks:
+      - id: cargo-check
+        name: cargo check
+        entry: cargo check
+        language: rust
+        types:
+          - rust
+        pass_filenames: false
+      - id: cargo-clippy
+        name: cargo clippy
+        entry: cargo clippy
+        language: rust
+        types:
+          - rust
+        pass_filenames: false
+      - id: cargo-fmt
+        name: cargo fmt
+        entry: cargo fmt
+        language: rust
+        types:
+          - rust
+        pass_filenames: false
+      - id: cargo-test
+        name: cargo test
+        entry: cargo test
+        language: rust
+        types:
+          - rust
+        pass_filenames: false
