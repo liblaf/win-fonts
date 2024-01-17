@@ -94,8 +94,12 @@ jobs:
           echo "TAG=$TAG" >> "$GITHUB_ENV"
       - name: Create Release
         run: |
-          gh release --repo="${{ github.repository }}" delete --cleanup-tag "$TAG" || true
-          gh release --repo="${{ github.repository }}" create --title "$TAG" "$TAG" *.zip
+          wget "https://github.com/${{ github.repository }}/releases/download/$TAG/SHA256SUMS" || true
+          if ! sha256sum --check "SHA256SUMS"; then
+            sha256sum *.zip > "SHA256SUMS"
+            gh release --repo="${{ github.repository }}" delete --cleanup-tag "$TAG" || true
+            gh release --repo="${{ github.repository }}" create --title "$TAG" "$TAG" "SHA256SUMS" *.zip
+          fi
         env:
           GH_TOKEN: ${{ github.token }}
     strategy:
