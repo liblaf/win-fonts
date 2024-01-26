@@ -4,6 +4,7 @@ on:
   push:
   schedule:
     - cron: 0 0 * * *
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -93,15 +94,11 @@ jobs:
           TAG="$Win"
           echo "TAG=$TAG" >> "$GITHUB_ENV"
       - name: Create Release
-        run: |
-          wget "https://github.com/${{ github.repository }}/releases/download/$TAG/SHA256SUMS" || true
-          if ! sha256sum --check "SHA256SUMS"; then
-            sha256sum *.zip > "SHA256SUMS"
-            gh release --repo="${{ github.repository }}" delete --cleanup-tag "$TAG" || true
-            gh release --repo="${{ github.repository }}" create --title "$TAG" "$TAG" "SHA256SUMS" *.zip
-          fi
-        env:
-          GH_TOKEN: ${{ github.token }}
+        uses: liblaf/template/.github/actions/release@main
+        with:
+          tag: ${{ env.TAG }}
+          files: |
+            *.zip
     strategy:
       matrix:
         Win:
