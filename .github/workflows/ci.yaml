@@ -14,6 +14,10 @@ jobs:
     name: CI
     runs-on: windows-latest
     steps:
+      - name: Install Tools
+        uses: liblaf/template/.github/actions/install@main
+        with:
+          choco: curl
       - name: Download Fido
         run: |
           # https://github.com/pbatard/Fido
@@ -83,7 +87,8 @@ jobs:
         with:
           pattern: ${{ matrix.Win }}-*
           merge-multiple: true
-      - name: Set Tag
+      - id: tag
+        name: Set Tag
         run: |
           filename=(*.zip)
           stem=${filename%.zip}
@@ -92,13 +97,12 @@ jobs:
           Lang=$(echo "$stem" | sed --regexp-extended 's/([[:alnum:]]+)-([[:graph:]]+)/\2/')
           echo "::notice::Rel = $Lang"
           TAG="$Win"
-          echo "TAG=$TAG" >> "$GITHUB_ENV"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
       - name: Create Release
         uses: liblaf/template/.github/actions/release@main
         with:
-          tag: ${{ env.TAG }}
-          files: |
-            *.zip
+          tag: ${{ steps.tag.outputs.tag }}
+          files: "*.zip"
     strategy:
       matrix:
         Win:
@@ -119,7 +123,8 @@ jobs:
         with:
           pattern: ${{ matrix.Win }}-*
           merge-multiple: true
-      - name: Set Tag
+      - id: tag
+        name: Set Tag
         run: |
           filename=(*.zip)
           stem=${filename%.zip}
@@ -128,9 +133,9 @@ jobs:
           Lang=$(echo "$stem" | sed --regexp-extended 's/([[:alnum:]]+)-([[:graph:]]+)/\2/')
           echo "::notice::Rel = $Lang"
           TAG="$Win"
-          echo "TAG=$TAG" >> "$GITHUB_ENV"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
       - name: Mark as Latest
-        run: gh release --repo="${{ github.repository }}" edit --latest "$TAG"
+        run: gh release --repo="${{ github.repository }}" edit --latest "${{ steps.tag.outputs.tag }}"
         env:
           GH_TOKEN: ${{ github.token }}
     strategy:

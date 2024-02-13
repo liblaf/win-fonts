@@ -1,5 +1,5 @@
 {
-  "words": ["gomod", "liblaf", "ofonts"],
+  "words": ["choco", "gomod", "liblaf", "ofonts"],
   "ignorePaths": ["*-lock.*", "*.lock", "cspell.json"],
   "dictionaries": [
     "bash",
