@@ -22,18 +22,18 @@ jobs:
         run: |
           # https://github.com/pbatard/Fido
           Invoke-WebRequest -Uri "https://raw.githubusercontent.com/pbatard/Fido/master/Fido.ps1" -OutFile "Fido.ps1"
-        shell: pwsh
+        shell: powershell
       - name: List Windows Versions & Languages
         run: |
           .\Fido.ps1 -Win List
           .\Fido.ps1 -Lang List
           exit 0
-        shell: pwsh
+        shell: powershell
       - name: Download Windows ISO
         run: |
           .\Fido.ps1 -Win "${{ matrix.Win }}" -Lang "${{ matrix.Lang }}"
           Get-ChildItem
-        shell: pwsh
+        shell: powershell
       - name: Set Tag
         run: |
           files=(*.iso)
