@@ -10,14 +10,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
-  ci:
-    name: CI
+  fonts:
+    name: Fonts
     runs-on: windows-latest
     steps:
-      - name: Install Tools
-        uses: liblaf/repo/.github/actions/install@main
-        with:
-          choco: curl
       - name: Download Fido
         run: |-
           # https://github.com/pbatard/Fido
@@ -34,18 +30,18 @@ jobs:
           .\Fido.ps1 -Win "${{ matrix.Win }}" -Lang "${{ matrix.Lang }}"
           Get-ChildItem
         shell: powershell
-      - name: Set Tag
+      - name: Get Tag
         run: |-
           files=(*.iso)
           stem=${files[0]%.iso}
           Win=$(echo "$stem" | sed --regexp-extended 's/([[:alnum:]]+)_([[:alnum:]]+)_([[:graph:]]+)_([[:alnum:]]+)/\1/')
-          echo "::notice::Win = $Win"
+          echo "Win=$Win"
           Rel=$(echo "$stem" | sed --regexp-extended 's/([[:alnum:]]+)_([[:alnum:]]+)_([[:graph:]]+)_([[:alnum:]]+)/\2/')
-          echo "::notice::Rel = $Rel"
+          echo "Rel=$Rel"
           Lang=$(echo "$stem" | sed --regexp-extended 's/([[:alnum:]]+)_([[:alnum:]]+)_([[:graph:]]+)_([[:alnum:]]+)/\3/')
-          echo "::notice::Lang = $Lang"
+          echo "Lang=$Lang"
           Arch=$(echo "$stem" | sed --regexp-extended 's/([[:alnum:]]+)_([[:alnum:]]+)_([[:graph:]]+)_([[:alnum:]]+)/\4/')
-          echo "::notice::Arch = $Arch"
+          echo "Arch=$Arch"
           TAG="$Win-$Lang"
           echo "TAG=$TAG" >> "$GITHUB_ENV"
         shell: bash
@@ -78,7 +74,7 @@ jobs:
     permissions:
       contents: write
     needs:
-      - ci
+      - fonts
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
@@ -93,9 +89,9 @@ jobs:
           filename=(*.zip)
           stem=${filename%.zip}
           Win=$(echo "$stem" | sed --regexp-extended 's/([[:alnum:]]+)-([[:graph:]]+)/\1/')
-          echo "::notice::Win = $Win"
+          echo "Win=$Win"
           Lang=$(echo "$stem" | sed --regexp-extended 's/([[:alnum:]]+)-([[:graph:]]+)/\2/')
-          echo "::notice::Rel = $Lang"
+          echo "Rel=$Lang"
           TAG="$Win"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
       - name: Release
@@ -103,6 +99,7 @@ jobs:
         with:
           tag: ${{ steps.tag.outputs.tag }}
           files: "*.zip"
+          recreate: true
     strategy:
       matrix:
         Win:
@@ -129,9 +126,9 @@ jobs:
           filename=(*.zip)
           stem=${filename%.zip}
           Win=$(echo "$stem" | sed --regexp-extended 's/([[:alnum:]]+)-([[:graph:]]+)/\1/')
-          echo "::notice::Win = $Win"
+          echo "Win=$Win"
           Lang=$(echo "$stem" | sed --regexp-extended 's/([[:alnum:]]+)-([[:graph:]]+)/\2/')
-          echo "::notice::Rel = $Lang"
+          echo "Rel=$Lang"
           TAG="$Win"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
       - name: Mark as Latest
