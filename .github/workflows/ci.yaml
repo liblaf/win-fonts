@@ -3,7 +3,7 @@ name: CI
 on:
   push:
   schedule:
-    - cron: 0 0 * * *
+    - cron: 0 0 * * 0
   workflow_dispatch:
 
 concurrency:
@@ -15,27 +15,27 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Install Tools
-        uses: liblaf/template/.github/actions/install@main
+        uses: liblaf/repo/.github/actions/install@main
         with:
           choco: curl
       - name: Download Fido
-        run: |
+        run: |-
           # https://github.com/pbatard/Fido
           Invoke-WebRequest -Uri "https://raw.githubusercontent.com/pbatard/Fido/master/Fido.ps1" -OutFile "Fido.ps1"
         shell: powershell
       - name: List Windows Versions & Languages
-        run: |
+        run: |-
           .\Fido.ps1 -Win List
           .\Fido.ps1 -Lang List
           exit 0
         shell: powershell
       - name: Download Windows ISO
-        run: |
+        run: |-
           .\Fido.ps1 -Win "${{ matrix.Win }}" -Lang "${{ matrix.Lang }}"
           Get-ChildItem
         shell: powershell
       - name: Set Tag
-        run: |
+        run: |-
           files=(*.iso)
           stem=${files[0]%.iso}
           Win=$(echo "$stem" | sed --regexp-extended 's/([[:alnum:]]+)_([[:alnum:]]+)_([[:graph:]]+)_([[:alnum:]]+)/\1/')
@@ -50,7 +50,7 @@ jobs:
           echo "TAG=$TAG" >> "$GITHUB_ENV"
         shell: bash
       - name: Extract Fonts
-        run: |
+        run: |-
           # https://wiki.archlinux.org/title/Microsoft_fonts#Extracting_fonts_from_a_Windows_ISO
           7z e *.iso sources/install.wim
           7z e -y install.wim 1/Windows/{Fonts/"*".{ttf,ttc},System32/Licenses/neutral/"*"/"*"/license.rtf} -ofonts/
@@ -89,7 +89,7 @@ jobs:
           merge-multiple: true
       - id: tag
         name: Set Tag
-        run: |
+        run: |-
           filename=(*.zip)
           stem=${filename%.zip}
           Win=$(echo "$stem" | sed --regexp-extended 's/([[:alnum:]]+)-([[:graph:]]+)/\1/')
@@ -98,8 +98,8 @@ jobs:
           echo "::notice::Rel = $Lang"
           TAG="$Win"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-      - name: Create Release
-        uses: liblaf/template/.github/actions/release@main
+      - name: Release
+        uses: liblaf/repo/.github/actions/release@main
         with:
           tag: ${{ steps.tag.outputs.tag }}
           files: "*.zip"
@@ -125,7 +125,7 @@ jobs:
           merge-multiple: true
       - id: tag
         name: Set Tag
-        run: |
+        run: |-
           filename=(*.zip)
           stem=${filename%.zip}
           Win=$(echo "$stem" | sed --regexp-extended 's/([[:alnum:]]+)-([[:graph:]]+)/\1/')
