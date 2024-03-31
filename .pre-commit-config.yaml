@@ -5,7 +5,7 @@ ci:
     - cspell
 repos:
   - repo: https://github.com/commitizen-tools/commitizen
-    rev: v3.15.0
+    rev: v3.20.0
     hooks:
       - id: commitizen
   - repo: https://github.com/pre-commit/mirrors-prettier
@@ -44,6 +44,6 @@ repos:
       - id: fix-spaces
       - id: forbid-bidi-controls
   - repo: https://github.com/streetsidesoftware/cspell-cli
-    rev: v8.4.0
+    rev: v8.6.0
     hooks:
       - id: cspell
