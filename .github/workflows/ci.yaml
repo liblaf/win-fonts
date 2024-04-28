@@ -6,9 +6,6 @@ on:
     - cron: 0 0 * * 0
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-
 jobs:
   fonts:
     name: Fonts
@@ -77,10 +74,16 @@ jobs:
       - fonts
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
+          path: dist
           pattern: ${{ matrix.Win }}-*
           merge-multiple: true
       - id: tag
@@ -98,7 +101,7 @@ jobs:
         uses: liblaf/repo/.github/actions/release@main
         with:
           tag: ${{ steps.tag.outputs.tag }}
-          files: "*.zip"
+          files: dist/*.zip
           recreate: true
     strategy:
       matrix:
@@ -114,6 +117,9 @@ jobs:
       - release
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - name: Download Artifacts
         uses: actions/download-artifact@v4

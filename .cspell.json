@@ -1,5 +1,5 @@
 {
-  "words": ["alnum", "bidi", "choco", "gomod", "liblaf", "ofonts"],
-  "ignorePaths": [".cspell.json", "*-lock.*", "*.lock"],
+  "words": ["alnum", "bidi", "commitizen", "liblaf", "ofonts"],
+  "ignorePaths": ["**/*-lock.*", "**/*.lock*", "**/.cspell.json"],
   "allowCompoundWords": true
 }
