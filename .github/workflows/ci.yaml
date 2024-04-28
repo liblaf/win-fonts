@@ -90,7 +90,7 @@ jobs:
         name: Set Tag
         run: |-
           filename=(dist/*.zip)
-          stem=${filename%.zip}
+          stem=$(basename --suffix ".zip" "$filename")
           Win=$(echo "$stem" | sed --regexp-extended 's/([[:alnum:]]+)-([[:graph:]]+)/\1/')
           echo "Win=$Win"
           Lang=$(echo "$stem" | sed --regexp-extended 's/([[:alnum:]]+)-([[:graph:]]+)/\2/')
