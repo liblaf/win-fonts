@@ -32,7 +32,7 @@ repos:
       - id: mixed-line-ending
       - id: trailing-whitespace
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.28.5
+    rev: 0.28.6
     hooks:
       - id: check-github-workflows
   - repo: https://github.com/sirosen/texthooks
