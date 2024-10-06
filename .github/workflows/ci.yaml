@@ -100,9 +100,9 @@ jobs:
       - name: Release
         uses: liblaf/repo/.github/actions/release@main
         with:
-          tag: ${{ steps.tag.outputs.tag }}
+          clobber: true
           files: dist/*.zip
-          recreate: true
+          tag: ${{ steps.tag.outputs.tag }}
     strategy:
       matrix:
         Win:
