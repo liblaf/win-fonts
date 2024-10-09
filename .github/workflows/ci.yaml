@@ -98,7 +98,7 @@ jobs:
           TAG="$Win"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
       - name: Release
-        uses: liblaf/repo/.github/actions/release@main
+        uses: liblaf/actions/release@main
         with:
           clobber: true
           files: dist/*.zip
