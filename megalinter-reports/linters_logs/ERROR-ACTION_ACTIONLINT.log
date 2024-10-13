@@ -1,0 +1,19 @@
+Results of actionlint linter (version 1.7.1)
+See documentation on https://megalinter.io/8.0.0/descriptors/action_actionlint/
+-----------------------------------------------
+
+❌ [ERROR] for workspace /github/workspace
+Linter raw log:
+.github/workflows/ci.yaml:46:9: shellcheck reported issue in this script: SC2035:info:2:6: Use ./*glob* or -- *glob* so names with dashes won't become options [shellcheck]
+   |
+46 |         run: |-
+   |         ^~~~
+.github/workflows/ci.yaml:52:9: shellcheck reported issue in this script: SC2035:info:1:17: Use ./*glob* or -- *glob* so names with dashes won't become options [shellcheck]
+   |
+52 |         run: 7z a "$TAG.zip" *
+   |         ^~~~
+.github/workflows/ci.yaml:91:9: shellcheck reported issue in this script: SC2128:warning:2:34: Expanding an array without an index only gives the first element [shellcheck]
+   |
+91 |         run: |-
+   |         ^~~~
+
