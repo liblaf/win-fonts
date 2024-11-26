@@ -1,3 +1,6 @@
+> [!WARNING]
+> This repository is archived. Please go to [gh:liblaf/fonts](https://github.com/liblaf/fonts).
+
 # Windows Fonts
 
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/liblaf/win-fonts/ci.yaml)](https://github.com/liblaf/win-fonts/actions/workflows/ci.yaml)
